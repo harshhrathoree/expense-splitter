@@ -14,6 +14,7 @@ import {
   Checkbox,
 } from "@/components/ui/checkbox";
 
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -282,6 +283,11 @@ function GroupDetails() {
       } catch (error) {
 
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
+        
 
         setSearchedUser(
           null
@@ -317,8 +323,17 @@ function GroupDetails() {
 
         setOpen(false);
 
+        toast.success(
+          "Member added successfully"
+        );
+
+
       } catch (error) {
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
       }
     };
 
@@ -350,7 +365,7 @@ function GroupDetails() {
       try {
 
         if (Number(amount) <= 0) {
-          alert(
+          toast.error(
             "Amount must be greater than 0"
           );
         
@@ -403,8 +418,16 @@ function GroupDetails() {
           false
         );
 
+        toast.success(
+          "Expense created successfully"
+        );
+
       } catch (error) {
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
       }
     };
 
@@ -437,8 +460,16 @@ function GroupDetails() {
           fetchSummary(),
         ]);
 
+        toast.success(
+          "Expense deleted successfully"
+        );
+
       } catch (error) {
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
       }
     };
 
@@ -497,7 +528,7 @@ function GroupDetails() {
       try {
 
         if (Number(editAmount) <= 0) {
-          alert(
+          toast.error(
             "Amount must be greater than 0"
           );
           return;
@@ -536,6 +567,9 @@ function GroupDetails() {
         ]);
 
         setEditExpenseOpen(false);
+        toast.success(
+          "Expense updated successfully"
+        );
         setEditingExpense(null);
 
       } catch (error) {
@@ -543,7 +577,7 @@ function GroupDetails() {
           "Update expense failed:",
           error?.response?.data?.message || error.message
         );
-        alert(
+        toast.error(
           error?.response?.data?.message ||
           "Failed to update expense"
         );
@@ -566,7 +600,7 @@ function GroupDetails() {
         if (
           fromUser === toUser
         ) {
-          alert(
+          toast.error(
             "From and To user cannot be same"
           );
         
@@ -609,8 +643,16 @@ function GroupDetails() {
           false
         );
 
+        toast.success(
+          "Settlement created successfully"
+        );
+
       } catch (error) {
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
       }
     };
 
@@ -644,8 +686,16 @@ function GroupDetails() {
           fetchSummary(),
         ]);
 
+        toast.success(
+          "Settlement deleted successfully"
+        );
+
       } catch (error) {
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
       }
     };
 
@@ -673,14 +723,14 @@ function GroupDetails() {
         if (
           Number(editSettlementAmount) <= 0
         ) {
-          alert(
+          toast.error(
             "Amount must be greater than 0"
           );
           return;
         }
 
         if (editFromUser === editToUser) {
-          alert(
+          toast.error(
             "From and To user cannot be same"
           );
           return;
@@ -716,6 +766,10 @@ function GroupDetails() {
         ]);
 
         setEditSettlementOpen(false);
+
+        toast.success(
+          "Settlement updated successfully"
+        );
         setEditingSettlement(null);
         setEditFromUser("");
         setEditToUser("");
@@ -723,6 +777,10 @@ function GroupDetails() {
 
       } catch (error) {
         console.error(error);
+        toast.error(
+          error?.response?.data?.message ||
+          "Something went wrong"
+        );
       }
     };
 
@@ -763,6 +821,10 @@ function GroupDetails() {
 
         } catch (error) {
           console.error(error);
+          toast.error(
+            error?.response?.data?.message ||
+            "Something went wrong"
+          );
         } finally {
           setLoading(false);
         }
