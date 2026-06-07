@@ -14,18 +14,39 @@ function Login() {
 
   const { login } = useAuth();
 
-  const handleLogin = async () => {
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  const handleLogin =
+  async () => {
+
     try {
-      const data = await loginUser({
-        email,
-        password,
-      });
 
-      login(data.user, data.accessToken);
+      setLoading(true);
 
-      navigate("/groups");
+      const data =
+        await loginUser({
+          email,
+          password,
+        });
+
+      login(
+        data.user,
+        data.accessToken
+      );
+
+      navigate("/dashboard");
+
     } catch (error) {
+
       console.error(error);
+
+    } finally {
+
+      setLoading(false);
+
     }
   };
 
@@ -63,12 +84,36 @@ function Login() {
             />
           </div>
 
-          {email}
-          {password}
+       
 
-          <Button className="w-full" onClick={handleLogin}>
-            Login
-          </Button>
+          <Button
+  className="w-full"
+  onClick={handleLogin}
+  disabled={loading}
+>
+  {loading
+    ? "Logging in..."
+    : "Login"}
+</Button>
+
+          <p className="text-center text-sm">
+
+  Don't have an account?{" "}
+
+  <span
+    onClick={() =>
+      navigate("/register")
+    }
+    className="
+      text-primary
+      font-medium
+      cursor-pointer
+    "
+  >
+    Register
+  </span>
+
+</p>
         </CardContent>
       </Card>
     </div>

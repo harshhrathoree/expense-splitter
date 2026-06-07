@@ -1,6 +1,8 @@
 import useAuth from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-
+import {
+    useNavigate,
+    Link, NavLink,
+  } from "react-router-dom";
 
 import { logoutUser } from "@/services/auth.service";
 
@@ -36,9 +38,47 @@ function DashboardLayout({
       <header className="border-b">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-          <h1 className="text-xl font-bold">
-            Expense Splitter
-          </h1>
+        <div
+  className="
+    flex
+    items-center
+    gap-6
+  "
+>
+
+<NavLink
+  to="/dashboard"
+  className="
+    text-xl
+    font-bold
+  "
+>
+  Expense Splitter
+</NavLink>
+
+<NavLink
+  to="/dashboard"
+  className={({ isActive }) =>
+    isActive
+      ? "font-semibold text-primary"
+      : "text-muted-foreground"
+  }
+>
+  Dashboard
+</NavLink>
+
+<NavLink
+  to="/groups"
+  className={({ isActive }) =>
+    isActive
+      ? "font-semibold text-primary"
+      : "text-muted-foreground"
+  }
+>
+  Groups
+</NavLink>
+
+</div>
 
           <div className="flex items-center gap-4">
 
