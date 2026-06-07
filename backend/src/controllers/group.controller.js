@@ -192,6 +192,16 @@ export const addMemberToGroup = async (req, res) => {
 
     await group.save();
 
+    await group.populate(
+      "createdBy",
+      "name email mobileNumber"
+    );
+    
+    await group.populate(
+      "members.user",
+      "name email mobileNumber"
+    );
+
     return res.status(200).json({
       success: true,
       message: "Member added successfully",
@@ -634,6 +644,21 @@ export const createExpense = async (
           createdBy:
             req.user._id,
         });
+
+        await expense.populate(
+          "paidBy",
+          "name email mobileNumber"
+        );
+        
+        await expense.populate(
+          "createdBy",
+          "name email mobileNumber"
+        );
+        
+        await expense.populate(
+          "participants.user",
+          "name email mobileNumber"
+        );
   
       return res.status(201).json({
         success: true,
@@ -1001,6 +1026,21 @@ export const createSettlement = async (
         createdBy:
           req.user._id,
       });
+
+      await settlement.populate(
+        "fromUser",
+        "name email mobileNumber"
+      );
+      
+      await settlement.populate(
+        "toUser",
+        "name email mobileNumber"
+      );
+      
+      await settlement.populate(
+        "createdBy",
+        "name email mobileNumber"
+      );
 
     return res.status(201).json({
       success: true,

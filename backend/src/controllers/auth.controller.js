@@ -204,6 +204,8 @@ export const login = async (req, res) => {
           message: "Session revoked",
         });
       }
+
+      
   
       const isValidToken =
         await bcrypt.compare(
@@ -215,6 +217,17 @@ export const login = async (req, res) => {
         return res.status(401).json({
           success: false,
           message: "Invalid refresh token",
+        });
+      }
+
+      const user = await User.findById(
+        decoded.userId
+      ).select("-password");
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
         });
       }
   
@@ -247,6 +260,14 @@ export const login = async (req, res) => {
         success: true,
         accessToken:
           newAccessToken,
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            mobileNumber:
+              user.mobileNumber,
+          }
+          
       });
     } catch (error) {
       return res.status(401).json({
