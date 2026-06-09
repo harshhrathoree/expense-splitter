@@ -73,6 +73,38 @@ A full-stack expense-sharing application inspired by Splitwise that helps users 
 * Environment-Based Configuration
 * Production-Ready Build Setup
 
+## Screenshots
+
+### Landing Page
+
+![Landing Page](screenshots/landingpage.png)
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Groups
+
+![Groups](screenshots/groups.png)
+
+### Group Details
+
+![Group Details](screenshots/groupdetails.png)
+
+### Suggested Settlements 
+
+![Group Details](screenshots/suggestedsettlements.png)
+
+### Expenses 
+
+![Group Details](screenshots/expenses.png)
+
+### Settlements 
+
+![Group Details](screenshots/settlements.png)
+
+
+
 ---
 
 ## Tech Stack
