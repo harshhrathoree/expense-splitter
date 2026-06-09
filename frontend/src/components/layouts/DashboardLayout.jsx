@@ -20,17 +20,30 @@ function DashboardLayout({
   } = useAuth();
 
   const handleLogout =
-    async () => {
-      try {
-        await logoutUser();
+  async () => {
 
-        logout();
+    console.log("1");
 
-        navigate("/login");
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    try {
+
+      await logoutUser();
+
+      console.log("2");
+
+      logout();
+
+      console.log("3");
+
+      navigate("/");
+
+      console.log("4");
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
 
   return (
     <div className="min-h-screen">

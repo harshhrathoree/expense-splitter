@@ -56,6 +56,8 @@ function Groups() {
   };
 
   useEffect(() => {
+    document.title =
+  "Groups | Expense Splitter";
     if (!accessToken) return;
     const fetchGroups = async () => {
       try {

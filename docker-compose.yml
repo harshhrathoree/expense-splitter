@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: ./backend
+
+    container_name: expense-backend
+
+    ports:
+      - "3000:3000"
+
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: expense-frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - backend

@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function Register() {
+  document.title =
+  "Register | Expense Splitter";
   const navigate = useNavigate();
 
   const { login } = useAuth();

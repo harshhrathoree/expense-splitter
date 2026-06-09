@@ -10,6 +10,8 @@ import { loginUser } from "@/services/auth.service";
 import useAuth from "@/hooks/useAuth";
 
 function Login() {
+    document.title =
+  "Login | Expense Splitter";
   const navigate = useNavigate();
 
   const { login } = useAuth();

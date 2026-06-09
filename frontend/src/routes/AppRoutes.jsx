@@ -5,12 +5,14 @@ import Register from "@/pages/auth/Register";
 import Groups from "@/pages/groups/Groups";
 import GroupDetails from "@/pages/groups/GroupDetails";
 import Dashboard from "@/pages/dashboard/Dashboard";
+import LandingPage from "@/pages/landingpage/LandingPage";
+import NotFound from "@/pages/notfound/NotFound";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import PublicRoute from "@/components/common/PublicRoute";
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route
         path="/login"
         element={
@@ -55,6 +57,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

@@ -1,11 +1,30 @@
-node_modules
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment files
 .env
+.env.*
+!.env.example
+
+backend/.env*
+!backend/.env.example
+
+frontend/.env*
+!frontend/.env.example
+
+# Build outputs
+dist/
+build/
+frontend/dist/
+
+# Coverage
+coverage/
+
+# OS files
 .DS_Store
 
-backend/node_modules
-backend/.env
-
-frontend/node_modules
-frontend/dist
-
-coverage
+# IDE files
+.vscode/
+.idea/

@@ -21,7 +21,7 @@ function ProtectedRoute({
   if (!accessToken) {
     return (
       <Navigate
-        to="/login"
+        to="/"
         replace
       />
     );

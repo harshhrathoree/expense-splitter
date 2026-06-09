@@ -19,6 +19,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title =
+  "Dashboard | Expense Splitter";
     if (!accessToken) return;
 
     const fetchDashboard = async () => {

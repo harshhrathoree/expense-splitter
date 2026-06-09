@@ -6,7 +6,7 @@ import {
 
 const api = axios.create({
   baseURL:
-    "http://localhost:3000/api",
+    import.meta.env.VITE_API_URL,
 
   withCredentials: true,
 
@@ -15,6 +15,7 @@ const api = axios.create({
       "application/json",
   },
 });
+
 
 api.interceptors.request.use(
   (config) => {
