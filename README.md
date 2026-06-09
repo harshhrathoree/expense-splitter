@@ -1,6 +1,8 @@
 # Expense Splitter
 
-A full-stack expense-sharing application inspired by Splitwise that helps groups track shared expenses, calculate balances, and settle debts efficiently.
+A full-stack expense-sharing application inspired by Splitwise that helps users manage group expenses, track balances, and settle debts efficiently. Built using the MERN stack with Docker support for seamless deployment.
+
+---
 
 ## Features
 
@@ -10,69 +12,96 @@ A full-stack expense-sharing application inspired by Splitwise that helps groups
 * User Login
 * JWT Authentication
 * Refresh Token Rotation
+* Session Restoration
 * Logout
 * Logout from All Devices
-* Session Management
+* Protected and Public Routes
+
+### Landing Experience
+
+* Modern Landing Page
+* Hero Section and Feature Highlights
+* Call-to-Action Sections
+* Custom 404 Not Found Page
+
+### Dashboard
+
+* Dashboard Overview
+* Total Groups Summary
+* Amount Owed vs Amount Receivable
+* Net Balance Calculation
+* Group-wise Balance Overview
 
 ### Group Management
 
-* Create Group
-* View Groups
-* Add Members
+* Create Groups
+* View All Groups
+* Add Members by Mobile Number
 * Remove Members
-* Leave Group
-* Delete Group
+* Leave Groups
+* Delete Groups
 
 ### Expense Management
 
-* Create Expense
+* Create Expenses
 * View Expenses
-* Update Expense
-* Delete Expense
-* Equal Split
-* Exact Split
+* Update Expenses
+* Delete Expenses
+* Equal Split Support
+* Exact Split Support
 
 ### Balance Engine
 
 * Calculate Net Balances
 * Debt Simplification
 * Determine Who Owes Whom
+* Suggested Settlements
+* Quick Balance Insights
 
 ### Settlements
 
-* Create Settlement
+* Create Settlements
 * View Settlements
-* Update Settlement
-* Delete Settlement
+* Update Settlements
+* Delete Settlements
 
-### Dashboard
+### DevOps
 
-* Group Summary
-* Total Expenses
-* Total Settlements
-* Member Statistics
+* Dockerized Backend
+* Dockerized Frontend
+* Docker Compose Support
+* Environment-Based Configuration
+* Production-Ready Build Setup
 
 ---
 
 ## Tech Stack
 
-### Backend
-
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* JWT Authentication
-* bcryptjs
-
-### Frontend (In Progress)
+### Frontend
 
 * React
 * Vite
 * Tailwind CSS
 * shadcn/ui
 * Axios
-* React Router
+* React Router DOM
+* Lucide React
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB Atlas
+* Mongoose
+* JWT Authentication
+* bcryptjs
+* Cookie Parser
+* Morgan
+
+### DevOps
+
+* Docker
+* Docker Compose
 
 ---
 
@@ -82,38 +111,122 @@ A full-stack expense-sharing application inspired by Splitwise that helps groups
 expense-splitter/
 
 ├── backend/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── middlewares/
-│   ├── utils/
-│   ├── config/
-│   └── server.js
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middlewares/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   └── utils/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   └── .env.example
 │
 ├── frontend/
-│   └── src/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   └── services/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   └── .env.example
 │
+├── docker-compose.yml
+├── .gitignore
 └── README.md
+```
+
+---
+
+## Local Development Setup
+
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd expense-splitter
+```
+
+### Backend Setup
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## Docker Setup
+
+Build and run the entire application using Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Stop the application:
+
+```bash
+docker compose down
+```
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+```env
+PORT=
+MONGODB_URI=
+JWT_SECRET=
+ACCESS_TOKEN_EXPIRY=
+REFRESH_TOKEN_EXPIRY=
+```
+
+### Frontend (`frontend/.env`)
+
+```env
+VITE_API_URL=
+```
+
+Example:
+
+```env
+VITE_API_URL=http://localhost:3000/api
 ```
 
 ---
 
 ## API Modules
 
-### Auth
+### Authentication
 
 * Register
 * Login
-* Refresh Token
+* Refresh Session
 * Logout
-* Logout All Devices
+* Logout From All Devices
 * Get Current User
 
 ### Groups
 
 * Create Group
 * Get Groups
-* Get Group By Id
+* Get Group Details
 * Add Member
 * Remove Member
 * Leave Group
@@ -123,13 +236,14 @@ expense-splitter/
 
 * Create Expense
 * Get Expenses
-* Get Expense By Id
 * Update Expense
 * Delete Expense
 
 ### Balances
 
 * Get Group Balances
+* Calculate Net Balances
+* Suggested Settlements
 
 ### Settlements
 
@@ -145,12 +259,13 @@ expense-splitter/
 * UPI Integration
 * Expense Notifications
 * Group Invitations
+* Real-Time Updates
 * Recurring Expenses
-* Real-time Updates
-* AWS Deployment
+* AWS EC2 Deployment
+* Custom Domain and HTTPS
 
 ---
 
 ## Author
 
-Harsh Rathore
+**Harsh Rathore**
