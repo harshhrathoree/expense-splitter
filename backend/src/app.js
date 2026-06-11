@@ -8,11 +8,17 @@ import userRouter from "./routes/user.routes.js";
 import dashboardRouter from "./routes/dashboard.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import config from "./config/config.js";
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin:
+      process.env.NODE_ENV ===
+      "production"
+        ? config.FRONTEND_URL
+        : "http://localhost:5173",
+
     credentials: true,
   }),
 );
