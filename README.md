@@ -2,6 +2,14 @@
 
 A full-stack expense-sharing application inspired by Splitwise that helps users manage group expenses, track balances, and settle debts efficiently. Built using the MERN stack with Docker support for seamless deployment.
 
+## Live Demo
+
+Frontend:
+https://your-vercel-url.vercel.app
+
+Backend:
+https://expense-splitter-api-lgmg.onrender.com
+
 ---
 
 ## Features
@@ -72,6 +80,14 @@ A full-stack expense-sharing application inspired by Splitwise that helps users 
 * Docker Compose Support
 * Environment-Based Configuration
 * Production-Ready Build Setup
+
+## Performance Optimizations
+
+- Redis Cache-Aside Pattern
+- Event-Driven Cache Invalidation
+- Eliminated N+1 MongoDB Queries
+- Reduced dashboard warm-up from ~17s to ~186ms
+- Reduced repeated dashboard requests to ~23ms
 
 ## Screenshots
 
