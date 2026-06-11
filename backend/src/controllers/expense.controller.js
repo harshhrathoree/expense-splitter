@@ -95,9 +95,18 @@ export const getExpenseById = async (
         });
       }
   
-      await Expense.findByIdAndDelete(
-        expenseId
+      const group =
+      await Group.findById(
+        expense.group
       );
+    
+    await Expense.findByIdAndDelete(
+      expenseId
+    );
+    
+    await invalidateDashboardCache(
+      group
+    );
   
       return res.status(200).json({
         success: true,
@@ -266,6 +275,10 @@ export const getExpenseById = async (
         formattedParticipants;
   
       await expense.save();
+
+      await invalidateDashboardCache(
+        group
+      );
   
       return res.status(200).json({
         success: true,

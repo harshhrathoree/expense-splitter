@@ -2,7 +2,9 @@ import Group from "../models/group.model.js"
 import User from "../models/user.model.js";
 import Expense from "../models/expense.model.js";
 import Settlement from "../models/settlement.model.js";
-
+import {
+  invalidateDashboardCache,
+} from "../utils/invalidateDashboardCache.js";
 
 
 export const deleteSettlement =
@@ -35,9 +37,18 @@ export const deleteSettlement =
         });
       }
 
-      await Settlement.findByIdAndDelete(
-        settlementId
+      const group =
+      await Group.findById(
+        settlement.group
       );
+    
+    await Settlement.findByIdAndDelete(
+      settlementId
+    );
+    
+    await invalidateDashboardCache(
+      group
+    );
 
       return res.status(200).json({
         success: true,
@@ -154,6 +165,9 @@ export const deleteSettlement =
         amount;
   
       await settlement.save();
+      await invalidateDashboardCache(
+        group
+      );
   
       return res.status(200).json({
         success: true,

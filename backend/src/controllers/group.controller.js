@@ -3,6 +3,9 @@ import User from "../models/user.model.js";
 import Expense from "../models/expense.model.js";
 import Settlement from "../models/settlement.model.js";
 import { calculateGroupBalances } from "../utils/calculateGroupBalances.js";
+import {
+  invalidateDashboardCache,
+} from "../utils/invalidateDashboardCache.js";
 export const createGroup = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -27,6 +30,10 @@ export const createGroup = async (req, res) => {
         },
       ],
     });
+
+    await invalidateDashboardCache(
+      group
+    );
 
     return res.status(201).json({
       success: true,
@@ -171,6 +178,9 @@ export const addMemberToGroup = async (req, res) => {
     await group.populate("createdBy", "name email mobileNumber");
 
     await group.populate("members.user", "name email mobileNumber");
+
+    await invalidateDashboardCache(group);
+     
 
     return res.status(200).json({
       success: true,
@@ -498,6 +508,9 @@ export const createExpense = async (req, res) => {
     await expense.populate("createdBy", "name email mobileNumber");
 
     await expense.populate("participants.user", "name email mobileNumber");
+    await invalidateDashboardCache(
+      group
+    );
 
     return res.status(201).json({
       success: true,
@@ -680,6 +693,10 @@ export const createSettlement = async (req, res) => {
     await settlement.populate("toUser", "name email mobileNumber");
 
     await settlement.populate("createdBy", "name email mobileNumber");
+
+    await invalidateDashboardCache(
+      group
+    );
 
     return res.status(201).json({
       success: true,
