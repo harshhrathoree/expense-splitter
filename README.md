@@ -5,7 +5,7 @@ A full-stack expense-sharing application inspired by Splitwise that helps users 
 ## Live Demo
 
 Frontend:
-https://your-vercel-url.vercel.app
+https://expense-splitter-frontend-two.vercel.app
 
 Backend:
 https://expense-splitter-api-lgmg.onrender.com
