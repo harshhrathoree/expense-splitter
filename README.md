@@ -238,11 +238,11 @@ docker compose down
 ### Backend (`backend/.env`)
 
 ```env
+MONGO_URI=
 PORT=
-MONGODB_URI=
 JWT_SECRET=
-ACCESS_TOKEN_EXPIRY=
-REFRESH_TOKEN_EXPIRY=
+REDIS_URL=
+FRONTEND_URL=
 ```
 
 ### Frontend (`frontend/.env`)
