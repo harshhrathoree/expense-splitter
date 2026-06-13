@@ -14,7 +14,7 @@ const app = express();
 app.use(
   cors({
     origin:
-      process.env.NODE_ENV ===
+      config.NODE_ENV ===
       "production"
         ? config.FRONTEND_URL
         : "http://localhost:5173",

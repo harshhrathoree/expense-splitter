@@ -15,6 +15,7 @@ const config = {
 
   REDIS_URL: process.env.REDIS_URL,
   FRONTEND_URL: process.env.FRONTEND_URL,
+  NODE_ENV : process.env.NODE_ENV,
 };
 
 export default config;
