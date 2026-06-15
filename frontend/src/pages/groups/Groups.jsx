@@ -7,22 +7,27 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createGroup } from "@/services/group.service";
+import { createGroup, deleteGroup } from "@/services/group.service";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getGroups } from "@/services/group.service";
 import useAuth from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { 
   Plus, 
   Users, 
   ChevronRight, 
   Hash,
   UserPlus,
-  Search
+  Search,
+  Trash2,
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
 
 function Groups() {
@@ -37,6 +42,19 @@ function Groups() {
   const [creating, setCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
+
+  // Delete state
+  const [deleteOpen, setDeleteOpen] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+
+  const fetchGroups = async () => {
+    try {
+      const data = await getGroups(accessToken);
+      setGroups(data.groups);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
@@ -61,6 +79,7 @@ function Groups() {
       setName("");
       setDescription("");
       setOpen(false);
+      toast.success("Group created");
     } catch (error) {
       console.error(error);
       setError(error?.response?.data?.message || "Failed to create group");
@@ -69,22 +88,34 @@ function Groups() {
     }
   };
 
+  const handleDeleteGroup = async (groupId) => {
+    try {
+      setDeleting(groupId);
+      await deleteGroup(groupId, accessToken);
+      setGroups((prev) => prev.filter((g) => g._id !== groupId));
+      toast.success("Group deleted");
+      setDeleteOpen(null);
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Failed to delete group");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   useEffect(() => {
     document.title = "Groups | Expense Splitter";
     if (!accessToken) return;
     
-    const fetchGroups = async () => {
+    const loadGroups = async () => {
       try {
-        const data = await getGroups(accessToken);
-        setGroups(data.groups);
-      } catch (error) {
-        console.error(error);
+        await fetchGroups();
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGroups();
+    loadGroups();
   }, [accessToken]);
 
   const filteredGroups = groups.filter(group => 
@@ -125,9 +156,9 @@ function Groups() {
                 <DialogTitle className="text-lg font-medium text-stone-900">
                   Create a new group
                 </DialogTitle>
-                <p className="text-sm text-stone-500 font-light mt-1">
+                <DialogDescription className="text-sm text-stone-500 font-light mt-1">
                   Start splitting expenses with friends
-                </p>
+                </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleCreateGroup} className="space-y-4 mt-4">
@@ -257,10 +288,77 @@ function Groups() {
             {filteredGroups.map((group) => (
               <Card
                 key={group._id}
-                onClick={() => navigate(`/groups/${group._id}`)}
-                className="border-stone-200 shadow-none hover:border-stone-300 hover:shadow-sm transition-all duration-200 cursor-pointer bg-white group"
+                className="border-stone-200 shadow-none hover:border-stone-300 hover:shadow-sm transition-all duration-200 bg-white group relative"
               >
-                <CardContent className="p-4 md:p-6">
+                {/* Delete button - top right */}
+                <div 
+                  className="absolute top-3 right-3 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Dialog 
+                    open={deleteOpen === group._id} 
+                    onOpenChange={(val) => setDeleteOpen(val ? group._id : null)}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md border-stone-200 bg-white">
+                      <DialogHeader>
+                        <DialogTitle className="text-lg font-medium text-stone-900 flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5 text-red-500" />
+                          Delete Group
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-stone-500 font-light mt-1">
+                          Permanently delete "{group.name}"?
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 mt-4">
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                          <p className="text-sm text-red-700 font-light">
+                            All expenses, settlements, and group data will be permanently deleted.
+                            All members must be settled first.
+                          </p>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            variant="outline"
+                            onClick={() => setDeleteOpen(null)}
+                            className="flex-1 border-stone-200 text-stone-600 hover:text-stone-900 hover:bg-stone-50 font-normal h-11 rounded-lg"
+                            disabled={deleting === group._id}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteGroup(group._id)}
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-normal h-11 rounded-lg"
+                            disabled={deleting === group._id}
+                          >
+                            {deleting === group._id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete Group"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* Card content - clickable */}
+                <CardContent 
+                  className="p-4 md:p-6 cursor-pointer"
+                  onClick={() => navigate(`/groups/${group._id}`)}
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">

@@ -9,19 +9,34 @@ import dashboardRouter from "./routes/dashboard.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import config from "./config/config.js";
+
 const app = express();
+
+// Allow multiple origins
+const allowedOrigins = [
+  config.FRONTEND_URL,                      // Production URL
+  'http://localhost:5173',                  // Local Vite dev server
+  'http://localhost:3000',                  // Alternative local port
+  'http://frontend:5173',                   // Docker Compose service name
+];
 
 app.use(
   cors({
-    origin:
-      config.NODE_ENV ===
-      "production"
-        ? config.FRONTEND_URL
-        : "http://localhost:5173",
-
+    origin: function (origin, callback) {
+      // Allow requests with no origin (Postman, curl, mobile apps)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('Blocked origin:', origin); // Debug log
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   }),
 );
+
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());

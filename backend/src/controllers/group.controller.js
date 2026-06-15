@@ -329,9 +329,34 @@ export const leaveGroup = async (req, res) => {
     if (currentMember.role === "admin") {
       return res.status(400).json({
         success: false,
-        message: "Admin cannot leave the group",
+        message: "Admin cannot leave the group. Transfer admin role first.",
       });
     }
+
+    // ─── Check user balance using existing utility ───
+    const expenses = await Expense.find({ group: groupId });
+    const settlements = await Settlement.find({ group: groupId });
+
+    const { netBalances } = calculateGroupBalances(group, expenses, settlements);
+
+    // Find current user's net balance
+    const userBalance = netBalances.find(
+      (b) => b.user.id.toString() === req.user._id.toString()
+    );
+
+    if (userBalance && userBalance.amount !== 0) {
+      const message = userBalance.amount > 0
+        ? `You are owed ₹${userBalance.amount.toFixed(2)}. Settle all balances before leaving.`
+        : `You owe ₹${Math.abs(userBalance.amount).toFixed(2)}. Settle all balances before leaving.`;
+
+      return res.status(400).json({
+        success: false,
+        message,
+      });
+    }
+    // ─── End balance check ───
+
+    await invalidateDashboardCache(group);
 
     group.members = group.members.filter(
       (member) => member.user.toString() !== req.user._id.toString(),
@@ -350,6 +375,7 @@ export const leaveGroup = async (req, res) => {
     });
   }
 };
+
 
 export const deleteGroup = async (req, res) => {
   try {
@@ -382,6 +408,32 @@ export const deleteGroup = async (req, res) => {
       });
     }
 
+    // ─── Check if all members are settled ───
+    const expenses = await Expense.find({ group: groupId });
+    const settlements = await Settlement.find({ group: groupId });
+
+    const { netBalances } = calculateGroupBalances(group, expenses, settlements);
+
+    // Check if anyone has a non-zero balance
+    const unsettledMembers = netBalances.filter((b) => b.amount !== 0);
+
+    if (unsettledMembers.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete group. Unsettled balances exist. Please settle all balances first.`,
+      });
+    }
+
+    // ─── Invalidate dashboard cache for ALL members BEFORE deleting ───
+    await invalidateDashboardCache(group);
+
+    // ─── Delete all related data ───
+    await Promise.all([
+      Expense.deleteMany({ group: groupId }),
+      Settlement.deleteMany({ group: groupId }),
+    ]);
+
+    // ─── Delete the group ───
     await Group.findByIdAndDelete(groupId);
 
     return res.status(200).json({

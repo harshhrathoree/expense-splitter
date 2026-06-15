@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import SummaryCard from "@/components/group/SummaryCard";
 import { NetBalancesCard, SettlementsCard } from "@/components/group/BalancesCard";
 import MembersCard from "@/components/group/MembersCard";
@@ -17,7 +18,6 @@ import {
   deleteExpense,
   updateExpense,
 } from "@/services/expense.service";
-import { useParams } from "react-router-dom";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { searchUserByMobile } from "@/services/user.service";
 import useAuth from "@/hooks/useAuth";
@@ -53,16 +53,14 @@ import {
   Trash2,
   Users,
   Crown,
-  ChevronRight,
   IndianRupee,
-  Check,
-  X,
   Loader2,
 } from "lucide-react";
 
 function GroupDetails() {
   const { groupId } = useParams();
-  const { accessToken } = useAuth();
+  const navigate = useNavigate();
+  const { accessToken, user } = useAuth();
 
   // Main data states
   const [group, setGroup] = useState(null);
@@ -116,6 +114,16 @@ function GroupDetails() {
   const [editToUser, setEditToUser] = useState("");
   const [editSettlementAmount, setEditSettlementAmount] = useState("");
   const [updatingSettlement, setUpdatingSettlement] = useState(false);
+
+  // Helper: Check if current user is admin
+  const isCurrentUserAdmin = useCallback(() => {
+    if (!group || !user) return false;
+    const currentMember = group.members.find(
+      (m) => (m.user?._id === user._id) || (m.user === user._id)
+    );
+    return currentMember?.role === "admin" || currentMember?.role === "creator" || 
+           group.createdBy?._id === user._id || group.createdBy === user._id;
+  }, [group, user]);
 
   // Data fetching functions
   const fetchBalances = useCallback(async () => {
@@ -431,7 +439,7 @@ function GroupDetails() {
           </div>
           <h2 className="text-xl font-medium text-stone-900 mb-2">Group not found</h2>
           <p className="text-stone-500 font-light mb-6">This group may have been deleted or you don't have access.</p>
-          <Button onClick={() => window.history.back()} variant="outline" className="border-stone-200 text-stone-600 font-normal">
+          <Button onClick={() => navigate("/groups")} variant="outline" className="border-stone-200 text-stone-600 font-normal">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Go back
           </Button>
@@ -446,7 +454,7 @@ function GroupDetails() {
         {/* Header */}
         <div>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate("/groups")}
             className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 font-light mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -523,21 +531,29 @@ function GroupDetails() {
           </div>
         </div>
 
-       {/* Summary & Net Balances - Side by side */}
-<div className="grid gap-4 lg:grid-cols-2 items-start">
-  <SummaryCard summary={summary} />
-  <NetBalancesCard netBalances={netBalances} />
-</div>
+        {/* Summary & Net Balances - Side by side */}
+        <div className="grid gap-4 lg:grid-cols-2 items-start">
+          <SummaryCard summary={summary} />
+          <NetBalancesCard netBalances={netBalances} />
+        </div>
 
-{/* Suggested Settlements - Full width */}
-<SettlementsCard 
-  balances={balances} 
-  onQuickSettle={handleQuickSettle} 
-  settlingBalance={settlingBalance} 
-/>
+        {/* Suggested Settlements - Full width */}
+        <SettlementsCard 
+          balances={balances} 
+          onQuickSettle={handleQuickSettle} 
+          settlingBalance={settlingBalance} 
+        />
 
-        {/* Members */}
-        <MembersCard members={group.members} />
+        {/* Members - with Leave Group built in */}
+        <MembersCard 
+          members={group.members} 
+          currentUserId={user?._id}
+          isAdmin={isCurrentUserAdmin()}
+          netBalances={netBalances}
+          groupId={groupId}
+          accessToken={accessToken}
+          onLeaveGroup={() => navigate("/groups")}
+        />
 
         {/* Expenses */}
         <Card className="border-stone-200 shadow-none bg-white">
@@ -563,26 +579,9 @@ function GroupDetails() {
                   <DialogTitle className="text-lg font-medium text-stone-900">Add Expense</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <Input
-                    placeholder="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm"
-                  />
-                  <Input
-                    placeholder="Description (optional)"
-                    value={expenseDescription}
-                    onChange={(e) => setExpenseDescription(e.target.value)}
-                    className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm"
-                  />
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="Amount (₹)"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm"
-                  />
+                  <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />
+                  <Input placeholder="Description (optional)" value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />
+                  <Input type="number" min="1" placeholder="Amount (₹)" value={amount} onChange={(e) => setAmount(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />
                   <div>
                     <Label className="text-sm font-medium text-stone-700 mb-1.5 block">Paid By</Label>
                     <Select value={paidBy} onValueChange={setPaidBy}>
@@ -591,9 +590,7 @@ function GroupDetails() {
                       </SelectTrigger>
                       <SelectContent>
                         {group.members.map((member) => (
-                          <SelectItem key={member.user._id} value={member.user._id}>
-                            {member.user.name}
-                          </SelectItem>
+                          <SelectItem key={member.user._id} value={member.user._id}>{member.user.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -602,25 +599,14 @@ function GroupDetails() {
                     <Label className="text-sm font-medium text-stone-700 mb-2 block">Participants</Label>
                     <div className="space-y-2 border border-stone-200 rounded-lg p-3">
                       {group.members.map((member) => (
-                        <label
-                          key={member.user._id}
-                          className="flex items-center gap-3 cursor-pointer py-1"
-                        >
-                          <Checkbox
-                            checked={selectedParticipants.includes(member.user._id)}
-                            onCheckedChange={() => handleParticipantChange(member.user._id)}
-                            className="border-stone-300 data-[state=checked]:bg-stone-900 data-[state=checked]:border-stone-900"
-                          />
+                        <label key={member.user._id} className="flex items-center gap-3 cursor-pointer py-1">
+                          <Checkbox checked={selectedParticipants.includes(member.user._id)} onCheckedChange={() => handleParticipantChange(member.user._id)} className="border-stone-300 data-[state=checked]:bg-stone-900 data-[state=checked]:border-stone-900" />
                           <span className="text-sm text-stone-700">{member.user.name}</span>
                         </label>
                       ))}
                     </div>
                   </div>
-                  <Button
-                    className="w-full bg-stone-900 hover:bg-stone-800 text-stone-50 font-normal h-11 rounded-lg"
-                    onClick={handleCreateExpense}
-                    disabled={creatingExpense || !title || !amount || !paidBy || selectedParticipants.length === 0}
-                  >
+                  <Button className="w-full bg-stone-900 hover:bg-stone-800 text-stone-50 font-normal h-11 rounded-lg" onClick={handleCreateExpense} disabled={creatingExpense || !title || !amount || !paidBy || selectedParticipants.length === 0}>
                     {creatingExpense ? "Creating..." : "Create Expense"}
                   </Button>
                 </div>
@@ -643,47 +629,18 @@ function GroupDetails() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-stone-900 truncate">{expense.title}</h3>
-                        {expense.description && (
-                          <p className="text-sm text-stone-500 font-light mt-0.5 truncate">{expense.description}</p>
-                        )}
+                        {expense.description && <p className="text-sm text-stone-500 font-light mt-0.5 truncate">{expense.description}</p>}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-                          <span className="text-sm font-medium text-stone-900 flex items-center gap-1">
-                            <IndianRupee className="w-3.5 h-3.5 text-stone-400" />
-                            {expense.amount}
-                          </span>
-                          <span className="text-xs text-stone-500">
-                            Paid by <span className="text-stone-700">{expense.paidBy?.name}</span>
-                          </span>
-                          <span className="text-xs text-stone-400">
-                            {expense.participants?.length} {expense.participants?.length === 1 ? "participant" : "participants"}
-                          </span>
-                          <span className="text-xs px-2 py-0.5 bg-stone-100 text-stone-600 rounded-full capitalize">
-                            {expense.splitType}
-                          </span>
+                          <span className="text-sm font-medium text-stone-900 flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5 text-stone-400" />{expense.amount}</span>
+                          <span className="text-xs text-stone-500">Paid by <span className="text-stone-700">{expense.paidBy?.name}</span></span>
+                          <span className="text-xs text-stone-400">{expense.participants?.length} {expense.participants?.length === 1 ? "participant" : "participants"}</span>
+                          <span className="text-xs px-2 py-0.5 bg-stone-100 text-stone-600 rounded-full capitalize">{expense.splitType}</span>
                         </div>
                       </div>
                       <div className="flex gap-1.5 flex-shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-stone-400 hover:text-stone-600 hover:bg-stone-100"
-                          onClick={() => handleOpenEditExpense(expense)}
-                          disabled={deletingExpenseId === expense._id}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-stone-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDeleteExpense(expense._id)}
-                          disabled={deletingExpenseId === expense._id}
-                        >
-                          {deletingExpenseId === expense._id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-stone-600 hover:bg-stone-100" onClick={() => handleOpenEditExpense(expense)} disabled={deletingExpenseId === expense._id}><Pencil className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteExpense(expense._id)} disabled={deletingExpenseId === expense._id}>
+                          {deletingExpenseId === expense._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                         </Button>
                       </div>
                     </div>
@@ -721,42 +678,19 @@ function GroupDetails() {
                   <div>
                     <Label className="text-sm font-medium text-stone-700 mb-1.5 block">From</Label>
                     <Select value={fromUser} onValueChange={setFromUser}>
-                      <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm">
-                        <SelectValue placeholder="Who paid?" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {group.members.map((member) => (
-                          <SelectItem key={member.user._id} value={member.user._id}>{member.user.name}</SelectItem>
-                        ))}
-                      </SelectContent>
+                      <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm"><SelectValue placeholder="Who paid?" /></SelectTrigger>
+                      <SelectContent>{group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-stone-700 mb-1.5 block">To</Label>
                     <Select value={toUser} onValueChange={setToUser}>
-                      <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm">
-                        <SelectValue placeholder="Who received?" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {group.members.map((member) => (
-                          <SelectItem key={member.user._id} value={member.user._id}>{member.user.name}</SelectItem>
-                        ))}
-                      </SelectContent>
+                      <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm"><SelectValue placeholder="Who received?" /></SelectTrigger>
+                      <SelectContent>{group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="Amount (₹)"
-                    value={settlementAmount}
-                    onChange={(e) => setSettlementAmount(e.target.value)}
-                    className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm"
-                  />
-                  <Button
-                    className="w-full bg-stone-900 hover:bg-stone-800 text-stone-50 font-normal h-11 rounded-lg"
-                    onClick={handleCreateSettlement}
-                    disabled={creatingSettlement || !fromUser || !toUser || !settlementAmount}
-                  >
+                  <Input type="number" min="1" placeholder="Amount (₹)" value={settlementAmount} onChange={(e) => setSettlementAmount(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />
+                  <Button className="w-full bg-stone-900 hover:bg-stone-800 text-stone-50 font-normal h-11 rounded-lg" onClick={handleCreateSettlement} disabled={creatingSettlement || !fromUser || !toUser || !settlementAmount}>
                     {creatingSettlement ? "Recording..." : "Record Settlement"}
                   </Button>
                 </div>
@@ -766,9 +700,7 @@ function GroupDetails() {
           <CardContent>
             {settlements.length === 0 ? (
               <div className="text-center py-8">
-                <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <HandCoins className="w-6 h-6 text-stone-400" />
-                </div>
+                <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3"><HandCoins className="w-6 h-6 text-stone-400" /></div>
                 <p className="text-stone-500 font-light">No settlements yet</p>
                 <p className="text-sm text-stone-400 font-light mt-1">Record payments between members</p>
               </div>
@@ -778,38 +710,13 @@ function GroupDetails() {
                   <div key={settlement._id} className="py-4 first:pt-0 last:pb-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-stone-900">
-                          <span className="font-medium">{settlement.fromUser?.name}</span>
-                          <span className="text-stone-400 mx-1.5">paid</span>
-                          <span className="font-medium">{settlement.toUser?.name}</span>
-                        </p>
-                        <p className="text-sm font-medium text-stone-900 mt-0.5 flex items-center gap-1">
-                          <IndianRupee className="w-3.5 h-3.5 text-stone-400" />
-                          {settlement.amount}
-                        </p>
+                        <p className="text-sm text-stone-900"><span className="font-medium">{settlement.fromUser?.name}</span><span className="text-stone-400 mx-1.5">paid</span><span className="font-medium">{settlement.toUser?.name}</span></p>
+                        <p className="text-sm font-medium text-stone-900 mt-0.5 flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5 text-stone-400" />{settlement.amount}</p>
                       </div>
                       <div className="flex gap-1.5 flex-shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-stone-400 hover:text-stone-600 hover:bg-stone-100"
-                          onClick={() => handleOpenEditSettlement(settlement)}
-                          disabled={deletingSettlementId === settlement._id}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-stone-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDeleteSettlement(settlement._id)}
-                          disabled={deletingSettlementId === settlement._id}
-                        >
-                          {deletingSettlementId === settlement._id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-stone-600 hover:bg-stone-100" onClick={() => handleOpenEditSettlement(settlement)} disabled={deletingSettlementId === settlement._id}><Pencil className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteSettlement(settlement._id)} disabled={deletingSettlementId === settlement._id}>
+                          {deletingSettlementId === settlement._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                         </Button>
                       </div>
                     </div>
@@ -823,9 +730,7 @@ function GroupDetails() {
         {/* Edit Expense Dialog */}
         <Dialog open={editExpenseOpen} onOpenChange={(val) => { if (!val) setEditingExpense(null); setEditExpenseOpen(val); }}>
           <DialogContent className="sm:max-w-md border-stone-200 bg-white max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-medium text-stone-900">Edit Expense</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle className="text-lg font-medium text-stone-900">Edit Expense</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
               <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />
               <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />
@@ -833,12 +738,8 @@ function GroupDetails() {
               <div>
                 <Label className="text-sm font-medium text-stone-700 mb-1.5 block">Paid By</Label>
                 <Select value={editPaidBy} onValueChange={setEditPaidBy}>
-                  <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}
-                  </SelectContent>
+                  <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>{group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
@@ -862,26 +763,20 @@ function GroupDetails() {
         {/* Edit Settlement Dialog */}
         <Dialog open={editSettlementOpen} onOpenChange={(val) => { if (!val) resetEditSettlementForm(); setEditSettlementOpen(val); }}>
           <DialogContent className="sm:max-w-md border-stone-200 bg-white">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-medium text-stone-900">Edit Settlement</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle className="text-lg font-medium text-stone-900">Edit Settlement</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
                 <Label className="text-sm font-medium text-stone-700 mb-1.5 block">From</Label>
                 <Select value={editFromUser} onValueChange={setEditFromUser}>
                   <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className="text-sm font-medium text-stone-700 mb-1.5 block">To</Label>
                 <Select value={editToUser} onValueChange={setEditToUser}>
                   <SelectTrigger className="border-stone-200 bg-stone-50/50 focus:ring-0 rounded-lg h-11 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{group.members.map((m) => <SelectItem key={m.user._id} value={m.user._id}>{m.user.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <Input type="number" min="1" value={editSettlementAmount} onChange={(e) => setEditSettlementAmount(e.target.value)} className="border-stone-200 bg-stone-50/50 focus:border-stone-400 focus:ring-0 rounded-lg h-11 text-sm" />

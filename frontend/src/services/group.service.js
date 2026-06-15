@@ -70,3 +70,44 @@ export const getGroups =
   
     return response.data;
   };
+
+  export const leaveGroup = async (groupId, token) => {
+    const response = await api.post(
+      `/group/${groupId}/leave`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  };
+
+  export const deleteGroup = async (
+    groupId,
+    accessToken
+  ) => {
+    const response = await api.delete(
+      `/group/${groupId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+  
+    return response.data;
+  };
+
+  export const removeMember = async (groupId, memberId, token) => {
+    const response = await api.delete(
+      `/group/${groupId}/members/${memberId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  };
